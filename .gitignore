@@ -1,0 +1,26 @@
+# Gradle and Android build output
+.gradle/
+**/build/
+out/
+
+# Android Studio and local machine state
+.idea/
+*.iml
+local.properties
+.DS_Store
+Thumbs.db
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+
+# Compiled Android packages
+*.apk
+*.aab
+*.ap_
+*.dex
