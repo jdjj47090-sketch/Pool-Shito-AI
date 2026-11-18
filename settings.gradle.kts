@@ -4,4 +4,4 @@ dependencyResolutionManagement {
     repositories { google(); mavenCentral() }
 }
 rootProject.name = "PoolShitoAI"
-include(":app")
+include(":app", ":core")
