@@ -19,6 +19,8 @@ import kotlin.math.min
 /** Circle candidates come from OpenCV Hough gradients; only candidates inside calibrated felt survive. */
 class OpenCvBallDetector(private val classifier: BallColorClassifier = BallColorClassifier()) : AutoCloseable {
     private val blurred = Mat(); private val circles = Mat(); private val saturation = Mat(); private val value = Mat(); private val colorMask = Mat()
+    private val circleMask = Mat(); private val innerMask = Mat(); private val outerBallMask = Mat(); private val backgroundRingMask = Mat()
+    private val insideColor = Mat(); private val centerColor = Mat(); private val outerColor = Mat()
 
     fun detect(hsv: Mat, gray: Mat, width: Int, height: Int, table: TableDetection): List<BallDetection> {
         val shortEdge = table.corners.indices.minOf { i ->
@@ -41,17 +43,14 @@ class OpenCvBallDetector(private val classifier: BallColorClassifier = BallColor
             val rect = Rect(left, top, min(width, (x + margin).toInt() + 1) - left, min(height, (y + margin).toInt() + 1) - top)
             if (rect.width <= 0 || rect.height <= 0) continue
             val localCenter = Point(x - rect.x, y - rect.y)
-            val circleMask = Mat.zeros(rect.height, rect.width, CvType.CV_8UC1)
-            val innerMask = Mat.zeros(rect.height, rect.width, CvType.CV_8UC1)
-            val outerBallMask = Mat.zeros(rect.height, rect.width, CvType.CV_8UC1)
-            val backgroundRingMask = Mat.zeros(rect.height, rect.width, CvType.CV_8UC1)
+            resetMask(circleMask, rect.height, rect.width)
+            resetMask(innerMask, rect.height, rect.width)
+            resetMask(outerBallMask, rect.height, rect.width)
+            resetMask(backgroundRingMask, rect.height, rect.width)
             val colors = colorMask.submat(rect)
             val values = value.submat(rect)
             val grayRoi = gray.submat(rect)
             val hsvRoi = hsv.submat(rect)
-            val insideColor = Mat()
-            val centerColor = Mat()
-            val outerColor = Mat()
             try {
                 Imgproc.circle(circleMask, localCenter, max(1, (r * 0.92).toInt()), Scalar(255.0), -1)
                 Imgproc.circle(innerMask, localCenter, max(1, (r * 0.42).toInt()), Scalar(255.0), -1)
@@ -79,14 +78,15 @@ class OpenCvBallDetector(private val classifier: BallColorClassifier = BallColor
                     output += BallDetection(Point2(x, y), r, confidence, ballKind)
                 }
             } finally {
-                listOf(
-                    circleMask, innerMask, outerBallMask, backgroundRingMask,
-                    colors, values, grayRoi, hsvRoi,
-                    insideColor, centerColor, outerColor,
-                ).forEach { it.release() }
+                colors.release(); values.release(); grayRoi.release(); hsvRoi.release()
             }
         }
         return suppressDuplicates(output, radius)
+    }
+
+    private fun resetMask(mask: Mat, rows: Int, cols: Int) {
+        mask.create(rows, cols, CvType.CV_8UC1)
+        mask.setTo(Scalar(0.0))
     }
 
     private fun insideTable(point: Point2, polygon: List<Point2>): Boolean {
@@ -108,5 +108,11 @@ class OpenCvBallDetector(private val classifier: BallColorClassifier = BallColor
         return result
     }
 
-    override fun close() { listOf(blurred, circles, saturation, value, colorMask).forEach { it.release() } }
+    override fun close() {
+        listOf(
+            blurred, circles, saturation, value, colorMask,
+            circleMask, innerMask, outerBallMask, backgroundRingMask,
+            insideColor, centerColor, outerColor,
+        ).forEach { it.release() }
+    }
 }
