@@ -26,7 +26,9 @@ class TrajectoryAnalyzer(private val restitution: Double = 0.90, private val bal
             val lateral = abs(cross(relative, direction))
             if (lateral > 2.0 * ballRadius) return@mapNotNull null
             val contactDistance = max(0.0, along - kotlin.math.sqrt(max(0.0, 4 * ballRadius * ballRadius - lateral * lateral)))
-            Triple(ball, contactDistance, relative.normalized())
+            val cueCenterAtContact = cue.position + direction * contactDistance
+            val contactNormal = (ball.position - cueCenterAtContact).normalized()
+            Triple(ball, contactDistance, contactNormal)
         }.minByOrNull { it.second }
 
         val segments = mutableListOf<TrajectorySegment>()

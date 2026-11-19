@@ -18,6 +18,21 @@ class TrajectoryAnalyzerTest {
         assertTrue(result.segments[0].points.last().x < 1.0)
     }
 
+    @Test fun thinCutUsesCentersAtContactToSetObjectBallDirection() {
+        val cue = Point2(0.40, 0.50)
+        val target = Point2(0.90, 0.54)
+        val result = TrajectoryAnalyzer().analyze(listOf(
+            TrajectoryAnalyzer.MotionBall(1, cue, Point2(0.8, 0.0), BallKind.CUE),
+            TrajectoryAnalyzer.MotionBall(2, target, Point2(0.0, 0.0), BallKind.SOLID),
+        ))!!
+        val objectPath = result.segments.single { it.kind == TrajectoryKind.OBJECT_BALL }.points
+        val direction = (objectPath[1] - objectPath[0]).normalized()
+        val expectedX = kotlin.math.sqrt(0.045 * 0.045 - 0.04 * 0.04) / 0.045
+        val expectedY = 0.04 / 0.045
+        assertEquals(expectedX, direction.x, 1e-5)
+        assertEquals(expectedY, direction.y, 1e-5)
+    }
+
     @Test fun suggestsClearPocketRouteWithoutClaimingAimWasObserved() {
         val result = TrajectoryAnalyzer().analyze(listOf(
             TrajectoryAnalyzer.MotionBall(1, Point2(0.45, 0.5), Point2(0.0, 0.0), BallKind.CUE),

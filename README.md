@@ -9,7 +9,7 @@ Android pool-table analysis using the device camera, OpenCV, and a local Kotlin 
 - OpenCV table segmentation for green/blue felt and quadrilateral boundary detection. Manual four-corner calibration is available for other felt colors or difficult viewpoints.
 - Hough-circle ball candidates from the HSV value channel (to retain color boundaries with weak grayscale contrast), center/radius/confidence output, conservative white cue-ball detection, solid classification from broad color coverage, and stripe classification only when color coverage forms a spatial band from center-to-edge samples; ambiguous balls remain `UNKNOWN`. Frame-to-frame IDs with a constant-velocity Kalman filter; automatic table corners smooth small jitter and reset tracks after abrupt geometry changes.
 - Perspective mapping to a 2:1 table plane, real-frame ball/table overlays, IDs, confidence, movement vectors, and estimated paths.
-- Equal-mass collision and cushion estimates for observed cue-ball movement. For stationary layouts, the app can draw one unobstructed cue-to-ball-to-pocket candidate. Candidate lines are guidance; cue aim is not observed and pocketing is not guaranteed.
+- Equal-mass collision estimates using the ball-center normal at contact, plus cushion estimates for observed cue-ball movement. For stationary layouts, the app can draw one unobstructed cue-to-ball-to-pocket candidate. Candidate lines are guidance; cue aim is not observed and pocketing is not guaranteed.
 
 ## Analysis model and limits
 

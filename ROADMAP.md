@@ -9,7 +9,7 @@ This roadmap reflects the Android scaffold that was inspected before implementat
 3. **Table and ball vision:** green/blue felt segmentation and quadrilateral detection; manual four-corner fallback; Hough-circle centers/radii from HSV value; felt-region rejection; conservative HSV cue/solid/stripe classification with `UNKNOWN` for ambiguous colors.
 4. **Tracking:** gated nearest-neighbor association, constant-velocity Kalman filtering, stable IDs, missed-frame retention, pixel-space velocity estimates, corner-jitter smoothing, and track reset when detected table geometry jumps.
 5. **Calibration:** long-edge-aware 2:1 table coordinates and forward/reverse projective homographies.
-6. **Physics:** equal-mass collision approximation, radius-aware cushion rebounds, clear stationary cue-to-ball-to-pocket candidate geometry, and text that distinguishes suggestions from predictions.
+6. **Physics:** equal-mass collision approximation using contact-time normals, radius-aware cushion rebounds, clear stationary cue-to-ball-to-pocket candidate geometry, and text that distinguishes suggestions from predictions.
 7. **Visualization and UI:** real frame-derived outlines, IDs, confidence, motion arrows, table perimeter, trajectory lines, calibration status, permission/error guidance, and working camera/calibration/performance controls.
 8. **Verification:** Android-free unit tests and an Android instrumentation test that draws a test frame and checks OpenCV table/ball detection, cue/solid/stripe classification, and rejection outside the table.
 
