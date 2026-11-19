@@ -42,29 +42,49 @@ class OpenCvBallDetector(private val classifier: BallColorClassifier = BallColor
             if (rect.width <= 0 || rect.height <= 0) continue
             val localCenter = Point(x - rect.x, y - rect.y)
             val circleMask = Mat.zeros(rect.height, rect.width, CvType.CV_8UC1)
-            Imgproc.circle(circleMask, localCenter, max(1, (r * 0.92).toInt()), Scalar(255.0), -1)
-            val colors = colorMask.submat(rect); val values = value.submat(rect); val grayRoi = gray.submat(rect); val hsvRoi = hsv.submat(rect)
-            val insideColor = Mat(); Core.bitwise_and(colors, circleMask, insideColor)
-            val fraction = Core.countNonZero(insideColor).toDouble() / max(1, Core.countNonZero(circleMask))
-            val ballMean = Core.mean(hsvRoi, circleMask).`val`
-            val ballKind = classifier.classify(fraction, Core.mean(values, circleMask).`val`[0])
-            val innerCircleMask = Mat.zeros(rect.height, rect.width, CvType.CV_8UC1)
-            val ringMask = Mat.zeros(rect.height, rect.width, CvType.CV_8UC1)
-            Imgproc.circle(innerCircleMask, localCenter, max(1, (r * 0.92).toInt()), Scalar(255.0), -1)
-            Imgproc.circle(ringMask, localCenter, max(1, (r * 1.28).toInt()), Scalar(255.0), -1)
-            Core.subtract(ringMask, innerCircleMask, ringMask)
-            val ringMean = Core.mean(hsvRoi, ringMask).`val`
             val innerMask = Mat.zeros(rect.height, rect.width, CvType.CV_8UC1)
-            Imgproc.circle(innerMask, localCenter, max(1, (r * 0.42).toInt()), Scalar(255.0), -1)
-            val grayContrast = abs(Core.mean(grayRoi, innerMask).`val`[0] - Core.mean(grayRoi, ringMask).`val`[0]) / 255.0
-            val hueDelta = abs(ballMean[0] - ringMean[0]).let { min(it, 180.0 - it) }
-            val colorContrast = (abs(ballMean[1] - ringMean[1]) * 0.5 + abs(ballMean[2] - ringMean[2]) + hueDelta * 2.0) / 400.0
-            val confidence = (0.38 + max(grayContrast, colorContrast) * 0.56).coerceIn(0.35, 0.94)
-            if (confidence >= 0.42 && r in (radius * 0.60)..(radius * 1.42) && ballMean.size >= 3) {
-                output += BallDetection(Point2(x, y), r, confidence, ballKind)
+            val outerBallMask = Mat.zeros(rect.height, rect.width, CvType.CV_8UC1)
+            val backgroundRingMask = Mat.zeros(rect.height, rect.width, CvType.CV_8UC1)
+            val colors = colorMask.submat(rect)
+            val values = value.submat(rect)
+            val grayRoi = gray.submat(rect)
+            val hsvRoi = hsv.submat(rect)
+            val insideColor = Mat()
+            val centerColor = Mat()
+            val outerColor = Mat()
+            try {
+                Imgproc.circle(circleMask, localCenter, max(1, (r * 0.92).toInt()), Scalar(255.0), -1)
+                Imgproc.circle(innerMask, localCenter, max(1, (r * 0.42).toInt()), Scalar(255.0), -1)
+                Core.subtract(circleMask, innerMask, outerBallMask)
+                Imgproc.circle(backgroundRingMask, localCenter, max(1, (r * 1.28).toInt()), Scalar(255.0), -1)
+                Core.subtract(backgroundRingMask, circleMask, backgroundRingMask)
+
+                Core.bitwise_and(colors, circleMask, insideColor)
+                Core.bitwise_and(colors, innerMask, centerColor)
+                Core.bitwise_and(colors, outerBallMask, outerColor)
+                val diskPixels = max(1, Core.countNonZero(circleMask))
+                val fraction = Core.countNonZero(insideColor).toDouble() / diskPixels
+                val centerFraction = Core.countNonZero(centerColor).toDouble() / max(1, Core.countNonZero(innerMask))
+                val outerFraction = Core.countNonZero(outerColor).toDouble() / max(1, Core.countNonZero(outerBallMask))
+                val ballMean = Core.mean(hsvRoi, circleMask).`val`
+                val ballKind = classifier.classify(
+                    fraction, Core.mean(values, circleMask).`val`[0], centerFraction, outerFraction,
+                )
+                val ringMean = Core.mean(hsvRoi, backgroundRingMask).`val`
+                val grayContrast = abs(Core.mean(grayRoi, innerMask).`val`[0] - Core.mean(grayRoi, backgroundRingMask).`val`[0]) / 255.0
+                val hueDelta = abs(ballMean[0] - ringMean[0]).let { min(it, 180.0 - it) }
+                val colorContrast = (abs(ballMean[1] - ringMean[1]) * 0.5 + abs(ballMean[2] - ringMean[2]) + hueDelta * 2.0) / 400.0
+                val confidence = (0.38 + max(grayContrast, colorContrast) * 0.56).coerceIn(0.35, 0.94)
+                if (confidence >= 0.42 && r in (radius * 0.60)..(radius * 1.42) && ballMean.size >= 3) {
+                    output += BallDetection(Point2(x, y), r, confidence, ballKind)
+                }
+            } finally {
+                listOf(
+                    circleMask, innerMask, outerBallMask, backgroundRingMask,
+                    colors, values, grayRoi, hsvRoi,
+                    insideColor, centerColor, outerColor,
+                ).forEach { it.release() }
             }
-            innerMask.release(); innerCircleMask.release(); ringMask.release(); circleMask.release(); insideColor.release()
-            colors.release(); values.release(); grayRoi.release(); hsvRoi.release()
         }
         return suppressDuplicates(output, radius)
     }

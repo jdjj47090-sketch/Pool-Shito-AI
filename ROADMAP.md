@@ -15,7 +15,8 @@ This roadmap reflects the Android scaffold that was inspected before implementat
 
 ## Remaining verification and data-driven follow-up
 
-1. Install Android SDK Platform 35 and build tools, then run `./gradlew :app:assembleDebug` and `./gradlew :app:connectedDebugAndroidTest` on an emulator/device. This checkout environment has no Android SDK, so neither task can complete here.
-2. Test on real green and blue tables in portrait and landscape. Record missed/false circles, cue classification rate, latency, and track-ID continuity at both processing resolutions.
-3. Tune HSV, Hough, and association thresholds from those recorded real frames. For red/black felt, use manual calibration; automatic cloth-color segmentation is currently limited to green/blue.
-4. Add learned ball classification only if field recordings show the classical classifier is insufficient and a redistributable model plus its license can be verified. No model is currently required or bundled.
+1. Hosted CI now passes `:core:test`, `:app:testDebugUnitTest`, and `:app:assembleDebug`; it uploads the debug APK as a workflow artifact rather than committing compiled output.
+2. Run `./gradlew :app:connectedDebugAndroidTest` on a physical Android device or a stable local emulator. GitHub-hosted emulator instances booted inconsistently or lost `adb` before instrumentation could execute.
+3. Test on real green and blue tables in portrait and landscape. Record missed/false circles, cue classification rate, latency, and track-ID continuity at both processing resolutions.
+4. Tune HSV, Hough, and association thresholds from recorded real frames. For red/black felt, use manual calibration; automatic cloth-color segmentation is currently limited to green/blue.
+5. Add learned ball classification only if field recordings show the classical classifier is insufficient and a redistributable model plus its license can be verified. No model is currently required or bundled.
