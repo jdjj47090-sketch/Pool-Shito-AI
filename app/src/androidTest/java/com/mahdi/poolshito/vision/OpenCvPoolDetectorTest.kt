@@ -21,15 +21,15 @@ class OpenCvPoolDetectorTest {
         assertTrue("OpenCV native runtime must load", OpenCVLoader.initLocal())
         val frame = Mat(480, 640, CvType.CV_8UC3, Scalar(20.0, 20.0, 20.0))
         val feltCorners = MatOfPoint(
-            Point(100.0, 80.0), Point(560.0, 120.0), Point(520.0, 390.0), Point(140.0, 360.0),
+            Point(100.0, 50.0), Point(560.0, 90.0), Point(520.0, 430.0), Point(140.0, 400.0),
         )
         Imgproc.fillConvexPoly(frame, feltCorners, Scalar(35.0, 135.0, 45.0))
         feltCorners.release()
-        Imgproc.circle(frame, Point(210.0, 220.0), 6, Scalar(242.0, 242.0, 242.0), -1)
-        Imgproc.circle(frame, Point(330.0, 220.0), 6, Scalar(220.0, 35.0, 35.0), -1)
-        Imgproc.circle(frame, Point(450.0, 220.0), 6, Scalar(242.0, 242.0, 242.0), -1)
-        Imgproc.circle(frame, Point(450.0, 220.0), 6, Scalar(220.0, 35.0, 35.0), -1)
-        Imgproc.circle(frame, Point(450.0, 220.0), 3, Scalar(242.0, 242.0, 242.0), -1)
+        Imgproc.circle(frame, Point(210.0, 220.0), 9, Scalar(242.0, 242.0, 242.0), -1)
+        Imgproc.circle(frame, Point(330.0, 220.0), 9, Scalar(220.0, 35.0, 35.0), -1)
+        Imgproc.circle(frame, Point(450.0, 220.0), 9, Scalar(242.0, 242.0, 242.0), -1)
+        Imgproc.circle(frame, Point(450.0, 220.0), 8, Scalar(220.0, 35.0, 35.0), -1)
+        Imgproc.circle(frame, Point(450.0, 220.0), 5, Scalar(242.0, 242.0, 242.0), -1)
         Imgproc.circle(frame, Point(620.0, 50.0), 9, Scalar(242.0, 242.0, 242.0), -1)
         val detector = OpenCvPoolDetector()
         try {

@@ -11,7 +11,7 @@ This roadmap reflects the Android scaffold that was inspected before implementat
 5. **Calibration:** long-edge-aware 2:1 table coordinates and forward/reverse projective homographies.
 6. **Physics:** equal-mass collision approximation using contact-time normals, radius-aware cushion rebounds, clear stationary cue-to-ball-to-pocket candidate geometry, and text that distinguishes suggestions from predictions.
 7. **Visualization and UI:** real frame-derived outlines, IDs, confidence, motion arrows, table perimeter, trajectory lines, calibration status, permission/error guidance, and working camera/calibration/performance controls.
-8. **Verification:** Android-free unit tests and an Android instrumentation test that draws a test frame and checks OpenCV table/ball detection, cue/solid/stripe classification, and rejection outside the table.
+8. **Verification:** Android-free unit tests and an Android instrumentation test that draws a perspective table frame and checks OpenCV table/ball detection, cue/solid/stripe classification, and rejection outside the table.
 
 ## Remaining verification and data-driven follow-up
 
