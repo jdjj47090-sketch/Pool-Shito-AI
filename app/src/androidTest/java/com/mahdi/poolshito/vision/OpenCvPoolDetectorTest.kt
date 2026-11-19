@@ -22,6 +22,9 @@ class OpenCvPoolDetectorTest {
         Imgproc.rectangle(frame, Point(50.0, 70.0), Point(590.0, 410.0), Scalar(35.0, 135.0, 45.0), -1)
         Imgproc.circle(frame, Point(210.0, 220.0), 9, Scalar(242.0, 242.0, 242.0), -1)
         Imgproc.circle(frame, Point(330.0, 220.0), 9, Scalar(220.0, 35.0, 35.0), -1)
+        Imgproc.circle(frame, Point(450.0, 220.0), 9, Scalar(242.0, 242.0, 242.0), -1)
+        Imgproc.circle(frame, Point(450.0, 220.0), 8, Scalar(220.0, 35.0, 35.0), -1)
+        Imgproc.circle(frame, Point(450.0, 220.0), 5, Scalar(242.0, 242.0, 242.0), -1)
         Imgproc.circle(frame, Point(620.0, 50.0), 9, Scalar(242.0, 242.0, 242.0), -1)
         val detector = OpenCvPoolDetector()
         try {
@@ -36,6 +39,10 @@ class OpenCvPoolDetectorTest {
             assertNotNull("Colored ball should be found", solid)
             assertTrue("Colored ball center should be localized; detections=${result.balls}", kotlin.math.hypot(solid!!.center.x - 330.0, solid.center.y - 220.0) < 8.0)
             assertEquals("Broad saturated color coverage should classify as solid", BallKind.SOLID, solid.kind)
+            val stripe = result.balls.minByOrNull { kotlin.math.hypot(it.center.x - 450.0, it.center.y - 220.0) }
+            assertNotNull("White ball with a colored band should be found", stripe)
+            assertTrue("Striped ball center should be localized; detections=${result.balls}", kotlin.math.hypot(stripe!!.center.x - 450.0, stripe.center.y - 220.0) < 8.0)
+            assertEquals("Outer colored band around a pale center should classify as stripe", BallKind.STRIPE, stripe.kind)
             assertTrue("A circle outside the detected felt boundary must be rejected", result.balls.none { kotlin.math.hypot(it.center.x - 620.0, it.center.y - 50.0) < 12.0 })
         } finally {
             detector.close(); frame.release()
