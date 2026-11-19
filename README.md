@@ -7,7 +7,7 @@ Android pool-table analysis using the device camera, OpenCV, and a local Kotlin 
 - CameraX live preview with runtime permission handling, rear/front camera switching, lifecycle rebinding, and keep-only-latest frame analysis.
 - Reused YUV/RGB buffers, portrait/landscape frame rotation, adjustable 5/8 fps analysis and 360p/720p processing resolution, and a responsive preview while processing runs on a single background executor.
 - OpenCV table segmentation for green/blue felt and quadrilateral boundary detection. Manual four-corner calibration is available for other felt colors or difficult viewpoints.
-- Hough-circle ball candidates, center/radius/confidence output, conservative white cue-ball detection, solid classification from broad color coverage, and stripe classification only when color coverage forms a spatial band from center-to-edge samples; ambiguous balls remain `UNKNOWN`. Frame-to-frame IDs with a constant-velocity Kalman filter.
+- Hough-circle ball candidates from the HSV value channel (to retain color boundaries with weak grayscale contrast), center/radius/confidence output, conservative white cue-ball detection, solid classification from broad color coverage, and stripe classification only when color coverage forms a spatial band from center-to-edge samples; ambiguous balls remain `UNKNOWN`. Frame-to-frame IDs with a constant-velocity Kalman filter; automatic table corners smooth small jitter and reset tracks after abrupt geometry changes.
 - Perspective mapping to a 2:1 table plane, real-frame ball/table overlays, IDs, confidence, movement vectors, and estimated paths.
 - Equal-mass collision and cushion estimates for observed cue-ball movement. For stationary layouts, the app can draw one unobstructed cue-to-ball-to-pocket candidate. Candidate lines are guidance; cue aim is not observed and pocketing is not guaranteed.
 
@@ -30,7 +30,7 @@ The app uses Android Gradle Plugin 8.7.3, Kotlin 2.0.21, CameraX 1.5.2, and Open
 
 ## Tests
 
-- `:core:test` covers YUV plane packing with row/pixel strides, perspective transforms in both directions, calibration degeneracy, track identity/loss recovery, frame throttling, collision paths, rebound behavior, and candidate pocket routes.
+- `:core:test` covers YUV plane packing with row/pixel strides, perspective transforms in both directions, calibration degeneracy and corner-jump handling, track identity/loss recovery, frame throttling, collision paths, rebound behavior, and candidate pocket routes.
 - `:app:connectedDebugAndroidTest` includes a synthetic pixel-frame test for native OpenCV table and ball detection. It requires an emulator or Android device with a supported ABI. GitHub Actions completed the API 35 AOSP instrumentation run successfully with four emulator cores: the OpenCV pixel-frame test passed (1/1). Earlier API 35 and API 30 attempts failed during emulator startup; they are superseded by the successful run. Physical-camera and real-table accuracy still require field testing.
 - Real-camera testing requires a table with the full playing surface visible, even lighting, focus, and the camera mounted or held steady above the table. Grant camera permission, tap **Calibrate table** if automatic calibration is not confident, then tap the four corners clockwise beginning along the longest rail. Keep balls separated while checking detection and ID stability; move the cue ball to verify vectors and collision paths. Try both orientations and front/rear camera before relying on measurements.
 

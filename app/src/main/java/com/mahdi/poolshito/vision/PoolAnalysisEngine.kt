@@ -4,6 +4,7 @@ import com.mahdi.poolshito.core.analysis.AnalysisSnapshot
 import com.mahdi.poolshito.core.analysis.BallKind
 import com.mahdi.poolshito.core.analysis.CalibrationStatus
 import com.mahdi.poolshito.core.calibration.TableCalibration
+import com.mahdi.poolshito.core.calibration.TableCornerSmoother
 import com.mahdi.poolshito.core.physics.TrajectoryAnalyzer
 import com.mahdi.poolshito.core.tracking.BallTracker
 import com.mahdi.poolshito.geometry.Point2
@@ -18,7 +19,7 @@ class PoolAnalysisEngine(
 ) : AutoCloseable {
     private var manualCorners: List<Point2>? = null
     private var calibration: TableCalibration? = null
-    private var stableAutoCorners: List<Point2>? = null
+    private val autoCornerSmoother = TableCornerSmoother()
     private var calibrationConfidence = 0.0
     private var tableMisses = 0
 
@@ -26,11 +27,11 @@ class PoolAnalysisEngine(
         require(corners.size == 4) { "Manual calibration requires four corners" }
         val next = TableCalibration.fromCorners(corners) ?: throw IllegalArgumentException("The selected table corners are degenerate")
         manualCorners = next.imageCorners; calibration = next; calibrationConfidence = 1.0; tableMisses = 0
-        tracker.reset()
+        autoCornerSmoother.reset(); tracker.reset()
     }
 
     fun clearCalibration() {
-        manualCorners = null; stableAutoCorners = null; calibration = null
+        manualCorners = null; autoCornerSmoother.reset(); calibration = null
         calibrationConfidence = 0.0; tableMisses = 0; tracker.reset()
     }
 
@@ -39,16 +40,13 @@ class PoolAnalysisEngine(
         val detectedTable = frame.table
         if (manualCorners == null && detectedTable != null) {
             tableMisses = 0
-            val previous = stableAutoCorners
-            val smoothed = if (previous == null || previous.size != 4) detectedTable.corners else previous.zip(detectedTable.corners).map { (a, b) ->
-                Point2(a.x * 0.82 + b.x * 0.18, a.y * 0.82 + b.y * 0.18)
-            }
-            stableAutoCorners = smoothed
-            calibration = TableCalibration.fromCorners(smoothed)
+            val update = autoCornerSmoother.update(detectedTable.corners, rgb.cols(), rgb.rows())
+            if (update.discontinuity) tracker.reset()
+            calibration = TableCalibration.fromCorners(update.corners)
             calibrationConfidence = detectedTable.confidence
         } else if (manualCorners == null) {
             tableMisses++
-            if (tableMisses > 80) { calibration = null; stableAutoCorners = null; calibrationConfidence = 0.0 }
+            if (tableMisses > 80) { calibration = null; autoCornerSmoother.reset(); calibrationConfidence = 0.0 }
         }
 
         val currentCalibration = calibration
