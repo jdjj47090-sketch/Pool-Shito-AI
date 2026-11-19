@@ -35,11 +35,7 @@ jobs:
           arch: x86_64
           profile: pixel_2
           disable-animations: true
-          script: >-
-            ./gradlew --no-daemon :core:test :app:testDebugUnitTest :app:connectedDebugAndroidTest :app:assembleDebug || {
-              adb logcat -d > emulator-logcat.txt;
-              exit 1;
-            }
+          script: ./gradlew --no-daemon :core:test :app:testDebugUnitTest :app:connectedDebugAndroidTest :app:assembleDebug || (adb logcat -d > emulator-logcat.txt; exit 1)
 
       - name: Retain debug APK
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
