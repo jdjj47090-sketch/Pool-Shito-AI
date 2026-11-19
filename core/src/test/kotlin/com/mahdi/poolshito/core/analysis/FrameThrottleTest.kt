@@ -4,6 +4,15 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class FrameThrottleTest {
+    @Test fun resumesImmediatelyWhenCameraTimestampClockRestarts() {
+        val throttle = FrameThrottle(100L)
+        assertTrue(throttle.accept(50_000L))
+        assertFalse(throttle.accept(50_050L))
+        assertTrue(throttle.accept(10L))
+        assertFalse(throttle.accept(60L))
+        assertTrue(throttle.accept(110L))
+    }
+
     @Test fun acceptsOnlyFramesBeyondConfiguredInterval() {
         val throttle = FrameThrottle(100L)
         assertTrue(throttle.accept(1_000L))
