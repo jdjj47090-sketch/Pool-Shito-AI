@@ -1,6 +1,8 @@
 package com.mahdi.poolshito.vision
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.mahdi.poolshito.core.analysis.BallKind
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -26,7 +28,14 @@ class OpenCvPoolDetectorTest {
             val result = detector.process(frame)
             assertNotNull("Felt quadrilateral should be found from the pixel mask", result.table)
             assertTrue("Circle detector should find the rendered ball pixels", result.balls.isNotEmpty())
-            assertTrue(result.balls.any { kotlin.math.hypot(it.center.x - 210.0, it.center.y - 220.0) < 8.0 })
+            val cue = result.balls.minByOrNull { kotlin.math.hypot(it.center.x - 210.0, it.center.y - 220.0) }
+            assertNotNull("White ball should be found", cue)
+            assertTrue(kotlin.math.hypot(cue!!.center.x - 210.0, cue.center.y - 220.0) < 8.0)
+            assertEquals("Bright low-saturation pixels should classify as cue ball", BallKind.CUE, cue.kind)
+            val solid = result.balls.minByOrNull { kotlin.math.hypot(it.center.x - 330.0, it.center.y - 220.0) }
+            assertNotNull("Colored ball should be found", solid)
+            assertTrue(kotlin.math.hypot(solid!!.center.x - 330.0, solid.center.y - 220.0) < 8.0)
+            assertEquals("Broad saturated color coverage should classify as solid", BallKind.SOLID, solid.kind)
             assertTrue("A circle outside the detected felt boundary must be rejected", result.balls.none { kotlin.math.hypot(it.center.x - 620.0, it.center.y - 50.0) < 12.0 })
         } finally {
             detector.close(); frame.release()
