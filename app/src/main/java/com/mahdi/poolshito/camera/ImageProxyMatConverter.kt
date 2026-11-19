@@ -4,6 +4,7 @@ import android.graphics.ImageFormat
 import com.mahdi.poolshito.core.camera.Yuv420Nv21Packer
 import androidx.camera.core.ImageProxy
 import org.opencv.core.CvType
+import org.opencv.core.Core
 import org.opencv.core.Mat
 import org.opencv.imgproc.Imgproc
 
@@ -30,9 +31,9 @@ class ImageProxyMatConverter : AutoCloseable {
         yuv.put(0, 0, yuvBytes)
         Imgproc.cvtColor(yuv, rgb, Imgproc.COLOR_YUV2RGB_NV21)
         when (image.imageInfo.rotationDegrees) {
-            90 -> Imgproc.rotate(rgb, rotated, Imgproc.ROTATE_90_CLOCKWISE)
-            180 -> Imgproc.rotate(rgb, rotated, Imgproc.ROTATE_180)
-            270 -> Imgproc.rotate(rgb, rotated, Imgproc.ROTATE_90_COUNTERCLOCKWISE)
+            90 -> Core.rotate(rgb, rotated, Core.ROTATE_90_CLOCKWISE)
+            180 -> Core.rotate(rgb, rotated, Core.ROTATE_180)
+            270 -> Core.rotate(rgb, rotated, Core.ROTATE_90_COUNTERCLOCKWISE)
             else -> rgb.copyTo(rotated)
         }
         if (mirrorHorizontally) {
