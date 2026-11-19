@@ -34,7 +34,7 @@ class OpenCvPoolDetectorTest {
             assertEquals("Bright low-saturation pixels should classify as cue ball", BallKind.CUE, cue.kind)
             val solid = result.balls.minByOrNull { kotlin.math.hypot(it.center.x - 330.0, it.center.y - 220.0) }
             assertNotNull("Colored ball should be found", solid)
-            assertTrue(kotlin.math.hypot(solid!!.center.x - 330.0, solid.center.y - 220.0) < 8.0)
+            assertTrue("Colored ball center should be localized; detections=${result.balls}", kotlin.math.hypot(solid!!.center.x - 330.0, solid.center.y - 220.0) < 8.0)
             assertEquals("Broad saturated color coverage should classify as solid", BallKind.SOLID, solid.kind)
             assertTrue("A circle outside the detected felt boundary must be rejected", result.balls.none { kotlin.math.hypot(it.center.x - 620.0, it.center.y - 50.0) < 12.0 })
         } finally {

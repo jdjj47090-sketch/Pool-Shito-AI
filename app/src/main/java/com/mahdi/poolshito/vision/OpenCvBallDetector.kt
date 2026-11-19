@@ -27,10 +27,11 @@ class OpenCvBallDetector(private val classifier: BallColorClassifier = BallColor
             val a = table.corners[i]; val b = table.corners[(i + 1) % 4]; hypot(a.x - b.x, a.y - b.y)
         }
         val radius = (shortEdge / 44.0).coerceIn(4.0, min(width, height).toDouble() * 0.06)
-        Imgproc.GaussianBlur(gray, blurred, Size(5.0, 5.0), 1.0)
+        Core.extractChannel(hsv, saturation, 1); Core.extractChannel(hsv, value, 2)
+        // V preserves the boundary of saturated balls whose grayscale luminance resembles the cloth.
+        Imgproc.GaussianBlur(value, blurred, Size(5.0, 5.0), 1.0)
         val accumulatorThreshold = (radius * 2.4).coerceIn(14.0, 24.0)
         Imgproc.HoughCircles(blurred, circles, Imgproc.HOUGH_GRADIENT, 1.2, max(radius * 1.45, 6.0), 110.0, accumulatorThreshold, max(3.0, radius * 0.62).toInt(), max(5.0, radius * 1.42).toInt())
-        Core.extractChannel(hsv, saturation, 1); Core.extractChannel(hsv, value, 2)
         Core.inRange(saturation, Scalar(48.0), Scalar(255.0), colorMask)
         val output = mutableListOf<BallDetection>()
         for (i in 0 until circles.cols()) {
