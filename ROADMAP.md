@@ -16,7 +16,7 @@ This roadmap reflects the Android scaffold that was inspected before implementat
 ## Remaining verification and data-driven follow-up
 
 1. Hosted CI now passes `:core:test`, `:app:testDebugUnitTest`, and `:app:assembleDebug`; it uploads the debug APK as a workflow artifact rather than committing compiled output.
-2. Run `./gradlew :app:connectedDebugAndroidTest` on a physical Android device or a stable local emulator. The API 35 AOSP hosted emulator reported app startup ANR under high CPU pressure; API 30 failed to start the emulator console (both 0/0 tests). CI now retries API 35 with four emulator cores and 4 GB RAM.
+2. Run `./gradlew :app:connectedDebugAndroidTest` on a physical Android device or a stable local emulator. GitHub Actions API 35 AOSP instrumentation passed 1/1 OpenCV pixel-frame test with four emulator cores and 4 GB RAM. Earlier emulator startup failures were superseded by this successful run.
 3. Test on real green and blue tables in portrait and landscape. Record missed/false circles, cue classification rate, latency, and track-ID continuity at both processing resolutions.
 4. Tune HSV, Hough, and association thresholds from recorded real frames. For red/black felt, use manual calibration; automatic cloth-color segmentation is currently limited to green/blue.
 5. Add learned ball classification only if field recordings show the classical classifier is insufficient and a redistributable model plus its license can be verified. No model is currently required or bundled.
