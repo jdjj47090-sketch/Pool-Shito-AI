@@ -64,9 +64,10 @@ jobs:
       - name: Run OpenCV instrumentation test
         uses: ReactiveCircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with:
-          api-level: 30
+          api-level: 35
           target: default
           arch: x86_64
+          cores: 4
           profile: pixel_2
           disable-animations: true
           script: ./gradlew --no-daemon :app:connectedDebugAndroidTest || (adb logcat -d > emulator-logcat.txt; exit 1)
